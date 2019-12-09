@@ -1,0 +1,152 @@
+<!doctype HTML>
+<html>
+    <head>
+    <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>
+    <!--<script src="https://raw.githack.com/jeromeetienne/AR.js/2.0.8/aframe/build/aframe-ar.js"></script>-->
+    <link rel="stylesheet" type="text/css" href="./css/style.css" />
+        <title>Merry Christmas!</title>
+        <meta name="description" content="Hello, WebVR! - A-Frame">
+        <script>
+          var radius = 1;
+          var insetRadius = 0.2;
+          var height = 3;
+          var segmentsHeight = 4;
+          var segmentsRadial = 8;
+
+                AFRAME.registerComponent('createtree', {
+
+                  init: function () {
+                    this.create();
+                  },
+                  create: function(){
+                  var christmastree = this.el;
+                  
+
+                  for (var i = christmastree.children.length - 1; i >= 0; i--) {
+                    christmastree.remove(christmastree.children[i]);
+                  }
+                          
+                  var inset = radius * insetRadius;
+                  var heightSegment = height / segmentsHeight;
+                  var radiusSegment = radius / segmentsHeight;
+                  var radiusBottom = radius;
+                  var radiusTop = radius-radiusSegment-inset;
+                  for(var i = 0; i<segmentsHeight; i++){
+                      var coneEl = document.createElement('a-cone');
+                      coneEl.setAttribute('material', 'flatShading', true);
+                      coneEl.setAttribute('material', 'color', '#0D5C00');
+                      coneEl.setAttribute('geometry', {radiusBottom: radiusBottom, 
+                                                      radiusTop: radiusTop,
+                                                      segmentsRadial: segmentsRadial,
+                                                    segmentsHeight: 1});
+                      coneEl.setAttribute('position', '0 '+heightSegment*i+' 0');
+                      coneEl.setAttribute('addbulbs', '');
+                    
+
+                      radiusBottom = radiusTop+inset;
+                      radiusTop = radiusBottom-radiusSegment-inset;
+                      if(radiusTop<0){
+                        radiusTop = 0;
+                      }
+                      christmastree.appendChild(coneEl);
+                }
+                //shadow
+                var scale = 2.3;
+                var imageEl = document.createElement('a-image');
+                imageEl.setAttribute('src', 'roundshadow.png');
+                imageEl.setAttribute('width', radius*scale);
+                imageEl.setAttribute('height', radius*scale);
+                imageEl.setAttribute('rotation', '90 0 0');
+                imageEl.setAttribute('position', '0 '+ (-radius/scale).toString() + ' 0');
+                christmastree.appendChild(imageEl);
+
+              }
+                })
+                AFRAME.registerComponent('addbulbs', {
+
+                  init: function () {
+                    var el = this.el;
+                    const positions = el.getObject3D('mesh').geometry.attributes.position.array;
+                    const offsetPosition = 3;
+                    for(var i = 0; i<positions.length/3;i++){
+                      
+                      yPos = positions[i*offsetPosition+1];
+                      if(yPos <  0.1){
+                        xPos = positions[i*offsetPosition];
+                        zPos = positions[i*offsetPosition+2];
+                        bulbEl = document.createElement('a-sphere');
+                        bulbEl.setAttribute('position', {x: xPos, y: yPos, z: zPos});
+                        var color = ['#ff3300', '#ffcc00', '#ffddff'];
+                        
+                        bulbEl.setAttribute('material', 'color', color[Math.floor(Math.random()*3)]);
+                        bulbEl.setAttribute('radius', 0.1);
+                        el.appendChild(bulbEl);
+                      }
+                      
+                      
+                    }
+
+                    // This will be called after the entity has properly attached and loaded.
+                    console.log('I am ready!');
+                  }
+                });
+                </script>
+      </head>
+      <body>
+                
+        <a-scene embedded arjs='sourceType: webcam; trackingMethod:best; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;'>
+            <a-marker type="barcode" value="0">
+              <a-entity createtree id="christmastree" position="0 0 0"></a-entity>
+              
+              <a-entity light="type: directional;
+                color:#FFF; intensity:1.6;" position="-1 1 0">
+              </a-entity>
+               <a-entity light="type: directional;
+                color:#FFA; intensity:0.7;" position="1 1 0">
+                </a-entity>
+                <a-entity position="0 2.9 0">
+                        <a-entity scale="0.15 0.15 0.15" rotation="90 0 0">
+                        <a-entity rotation="0 0 0">
+                          <a-triangle position="0 0 -1" rotation="-90 0 0" material="color:#ffdd00; shader:flat; side:double;"></a-triangle>
+                        </a-entity>
+                        <a-entity rotation="0 72 0">
+                          <a-triangle position="0 0 -1" rotation="-90 0 0" material="color:#ffdd00; shader:flat; side:double;"></a-triangle>
+                        </a-entity>
+                        <a-entity rotation="0 144 0">
+                          <a-triangle position="0 0 -1" rotation="-90 0 0" material="color:#ffdd00; shader:flat; side:double;"></a-triangle>
+                        </a-entity>
+                        <a-entity rotation="0 216 0">
+                          <a-triangle position="0 0 -1" rotation="-90 0 0" material="color:#ffdd00; shader:flat; side:double;"></a-triangle>
+                        </a-entity>
+                        <a-entity rotation="0 288 0">
+                            <a-triangle position="0 0 -1" rotation="-90 0 0" material="color:#ffdd00; shader:flat; side:double;"></a-triangle>
+                        </a-entity>
+                      </a-entity>
+              <a-sky color="#ECECEC"></a-sky>
+            </a-marker>
+        </a-scene>
+            <div class='slidercontainer'>
+              <input  type='range' min='3' max='6' value='3' class='slider' id='segmentsHeight'>
+              <input  type='range' min='5' max='8' value='5' class='slider' id='segmentsRadial'>
+              <input  type='range' min='5' max='25' value='12' class='slider' id='radius'>
+              </div>
+              <script>
+                var christmastree= document.getElementById("christmastree").components["createtree"];
+                var sliderHeight = document.getElementById("segmentsHeight");
+                var sliderRadial= document.getElementById("segmentsRadial");
+                var sliderRadius= document.getElementById("radius");
+                sliderHeight.oninput = function() {
+                  segmentsHeight = this.value;
+                  christmastree.create();
+              } 
+              sliderRadius.oninput = function() {
+                  radius = this.value/10;
+                  christmastree.create();
+              } 
+                sliderRadial.oninput = function() {
+                  segmentsRadial = this.value;
+                  christmastree.create();
+              } 
+          </script>
+          </body>
+</html>
